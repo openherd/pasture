@@ -1,0 +1,33 @@
+{
+  "name": "openherd",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "AGPL-3.0-only",
+  "type": "commonjs",
+  "dependencies": {
+    "@chainsafe/libp2p-gossipsub": "^14.1.0",
+    "@chainsafe/libp2p-noise": "^16.0.1",
+    "@chainsafe/libp2p-yamux": "^7.0.1",
+    "@libp2p/bootstrap": "^11.0.17",
+    "@libp2p/identify": "^3.0.15",
+    "@libp2p/peer-list": "^0.0.0",
+    "@libp2p/ping": "^2.0.15",
+    "@libp2p/tcp": "^10.0.15",
+    "@prisma/client": "^6.3.0",
+    "@tensorflow-models/toxicity": "^1.2.2",
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "body-parser": "^1.20.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "geoip-lite2": "^2.2.3",
+    "geolib": "^3.3.4",
+    "libp2p": "^2.5.0",
+    "multiaddr": "^10.0.1",
+    "nunjucks": "^3.2.4",
+    "openpgp": "^6.0.1",
+    "pretty-date": "^0.2.0",
+    "prisma": "^6.3.0",
+    "zod": "^3.24.1"
+  }
+}

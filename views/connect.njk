@@ -1,0 +1,16 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+    <h1>Connect to this instance</h1>
+    <p>You can connect to this peer using the following address</p>
+    <pre><code>{{ id }}</code></pre>
+    <h2>Or, you can request peering</h2>
+    <p>Your peer will be dialed as soon as you hit submit.</p>
+    <form action="/request-peering" method="POST">
+        <label for="id">Multiaddress</label>
+        <input id="id" name="id" placeholder="/ip4/192.168.1.381/tcp/43587/p2p/12D3KooWS6faDzVVo51yCF6hB8EDRDkfB7K9Yp7PCVgfuHzK7DYV">
+       <br>
+       <button>Submit</button>
+    </form>
+</script>
+{% endblock %}

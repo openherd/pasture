@@ -1,0 +1,51 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+    <h1>New Post</h1>
+    <p>A couple of things to note</p>
+    <ul>
+        <li>Your IP address is not logged. You can also use a VPN like <a href="https://mullvad.net" target="_blank">Mullvad</a></li>
+        <li>Once a post is published, it cannot be deleted. Not all clients are implemented the same way and it is a peer-to-peer network</li>
+        <li>Posts generally disappear from the network after 2 weeks or so. Some nodes/clients may keep them for longer or shorter but that's the general rule</li>
+        <li>Your post is skewed by at least 2km (1.24mi)</li>
+        <li>We also use local spam prevention, which means your text does not leave our servers.</li>
+    </ul>
+    <p id="status"></p>
+    <form action="/new" method="POST">
+        <textarea name="text"></textarea>
+        <input name="lat" style="display:none;"></input>
+        <input name="lon" style="display:none;"></input>
+
+        <br>
+        <button disabled="true" id="submit">Submit</button>
+    </form>
+    <script>
+    
+        function getUserLocation(position) {
+            const {latitude, longitude} = window.skewLocation(position.coords.latitude, position.coords.longitude)
+            sessionStorage.setItem("lat", latitude)
+            sessionStorage.setItem("lon", longitude)
+            document.cookie = "lat=" + latitude + "; path=/";
+            document.cookie = "lon=" + longitude + "; path=/";
+            document
+                .querySelector("#status")
+                .style
+                .display = "none";
+            document
+                .querySelector("#submit")
+                .disabled = false
+        }
+        if (!sessionStorage.getItem("lat") || !sessionStorage.getItem("lon")) {
+            document
+                .querySelector("#status")
+                .innerHTML = "Openherd is an anonymous, location-based platform that lets you see what's happening around you. To share posts, we need access to your location. But, don’t worry! Your location is randomly shifted by at least 2 km (~1.24 mi) in a random direction, ensuring no one can pinpoint your exact position.<br><br><button onclick=\"navigator.geolocation.getCurrentPosition(getUserLocation)\">Give location access</button>";
+        } else {
+            document
+                .querySelector("#submit")
+                .disabled = false
+        }
+    </script>
+    <script src="/utils.js"></script>
+
+</script>
+{% endblock %}

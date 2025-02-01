@@ -1,0 +1,37 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+    <h1>Local feed</h1>
+    <p>Welcome to Openherd! This is a peer-to-peer YikYak alternative. Peer-to-peer makes it much harder to take down as well. This feed take the location and the time it was posted into account.</p>
+    {{ notice | safe }}
+    {% if posts %}{% endif %}
+
+    {% if posts %}
+
+        {% for post in posts %}
+            {% if env.MODERATE_POSTS == "warn" and post.moderated %}
+                <details>
+                    <summary>Flagged Post</summary>
+                    <blockquote>
+                        <p>{{ post.text }}</p>
+                    </blockquote>
+                    <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                    </p>
+                </details>
+            {% elif env.MODERATE_POSTS == "hide" and post.moderated%}
+
+            {% else %}
+                <blockquote>
+                    <p>{{ post.text }}</p>
+                </blockquote>
+                <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                </p>
+                <hr>
+            {% endif %}
+        {% endfor %}
+
+    {% else %}
+        <p>No posts! Why not make one?</p>
+    {% endif %}
+
+{% endblock %}

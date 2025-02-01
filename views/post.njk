@@ -1,0 +1,14 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+    <h1>View post</h1>
+    <script src="/utils.js"></script>
+     <blockquote><p>{{ post.text }}</p></blockquote>
+     <h2>Metadata</h2>
+     <ul>
+        <li><abbr title="The time this Openyak instance recieved the post">Imported at</abbr>: {{ post.importedAt }}</li>
+        <li><abbr title="When the post was actually created">Created at</abbr>: {{ post.createdAt }}</li>
+        <li><abbr title="This is a unique ID generated from a post's specific PGP key">Post ID</abbr>: {{ post.id }}</li>
+     </ul>
+</script>
+{% endblock %}

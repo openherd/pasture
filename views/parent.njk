@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script>
+            if (location.protocol !== 'https:' && location.hostname != "localhost") {
+                location.replace('https://' + location.href.split('//')[1]);
+            }
+        </script>
+        <meta charset="utf-8"/>
+        <title>Openherd</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+        <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/holiday.css@0.11.2"
+/>
+    </head>
+    <body>
+        <header>
+            <h1>Openherd</h1>
+        </header>
+        <nav>
+            <ul>
+                <li>
+                    <a href="/" id="home-link">Home</a>
+                </li>
+                <li>
+                    <a href="/global" id="global-link">Global Feed</a>
+                </li>
+                <li>
+                    <a href="/new" id="new-link">&plus; New Post</a>
+                </li>
+ <li>
+                    <a href="/connect" id="connect-link">Connect to this instance</a>
+                </li>
+            </ul>
+        </nav>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var path = window.location.pathname;
+                var links = {
+                    '/global': document.getElementById('global-link'),
+                    '/new': document.getElementById('new-link'),
+                    '/connect': document.getElementById('connect-link'),
+                    '/': document.getElementById('home-link')
+                };
+
+                for (var key in links) {
+                    if (path.includes(key)) {
+                        links[key].setAttribute('aria-current', 'page');
+                        break;
+                    }
+                }
+
+            });
+        </script>
+        <main>
+            {% block main %}{% endblock %}
+        </main>
+        <footer>
+      &copy; 2025 Openyak, AGPL 3.0. &bull; Connected to <b>{{ peers }} </b> peer(s).
+        </footer>
+    </body>
+</html>

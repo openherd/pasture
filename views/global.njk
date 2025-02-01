@@ -1,0 +1,34 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+    <h1>Global feed</h1>
+    <p>The feed is sorted by date only.</p>
+    {{ notice | safe }}
+   {% if posts %}
+
+        {% for post in posts %}
+            {% if env.MODERATE_POSTS == "warn" and post.moderated %}
+                <details>
+                    <summary>Flagged Post</summary>
+                    <blockquote>
+                        <p>{{ post.text }}</p>
+                    </blockquote>
+                    <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                    </p>
+                </details>
+            {% elif env.MODERATE_POSTS == "hide" and post.moderated%}
+            {% else %}
+                <blockquote>
+                    <p>{{ post.text }}</p>
+                </blockquote>
+                <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                </p>
+                <hr>
+            {% endif %}
+        {% endfor %}
+
+    {% else %}
+        <p>No posts! Why not make one?</p>
+    {% endif %}
+
+{% endblock %}

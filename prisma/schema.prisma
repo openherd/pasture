@@ -1,0 +1,22 @@
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native"]
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./database.sqlite"
+}
+
+model Post {
+    id         String   @id @unique
+    createdAt  DateTime @default(now())
+    importedAt DateTime @default(now())
+    text       String
+    moderated  Boolean  @default(false)
+    latitude   String
+    longitude  String
+    publicKey  String
+    privateKey String? // Only if you're the OP
+    parent     String?
+}
