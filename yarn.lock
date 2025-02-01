@@ -102,6 +102,23 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.5.tgz#4fc56c15c580b9adb7dc3c333a134e540b44bfb1"
   integrity sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==
 
+"@libp2p/autonat@^2.0.16":
+  version "2.0.16"
+  resolved "https://registry.yarnpkg.com/@libp2p/autonat/-/autonat-2.0.16.tgz#8fe0dc7e014cf9c10d93e07afa3d7edcd8aa1fbd"
+  integrity sha512-1KgbWDr5XViBKkBjwQgDRv2Kf4QP5VTDWka4HelSAhIDcLf93ImiYkYSYHgSyC+PG05UmaQIcfQ3QQQJHztWbw==
+  dependencies:
+    "@libp2p/interface" "^2.4.0"
+    "@libp2p/interface-internal" "^2.2.2"
+    "@libp2p/peer-collections" "^6.0.14"
+    "@libp2p/peer-id" "^5.0.10"
+    "@libp2p/utils" "^6.3.1"
+    "@multiformats/multiaddr" "^12.3.3"
+    any-signal "^4.1.1"
+    it-protobuf-stream "^1.1.5"
+    multiformats "^13.3.1"
+    protons-runtime "^5.5.0"
+    uint8arraylist "^2.4.8"
+
 "@libp2p/bootstrap@^11.0.17":
   version "11.0.17"
   resolved "https://registry.yarnpkg.com/@libp2p/bootstrap/-/bootstrap-11.0.17.tgz#3e37d13dd256272eb223a1585e7a85b586e6f5cb"
@@ -112,6 +129,31 @@
     "@libp2p/peer-id" "^5.0.10"
     "@multiformats/mafmt" "^12.1.6"
     "@multiformats/multiaddr" "^12.3.3"
+
+"@libp2p/circuit-relay-v2@^3.1.7":
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/@libp2p/circuit-relay-v2/-/circuit-relay-v2-3.1.7.tgz#125c588939c9a3658957537cb747805f3fd665a7"
+  integrity sha512-SsF49IVwIhnWtVtvxjdEKPHFwc3eN/XwV3BjLeYmuI9yR0DRs0+Li2VyKALB3bj+k6sghgT2ByC2FhtKe8JBPw==
+  dependencies:
+    "@libp2p/crypto" "^5.0.9"
+    "@libp2p/interface" "^2.4.0"
+    "@libp2p/interface-internal" "^2.2.2"
+    "@libp2p/peer-collections" "^6.0.14"
+    "@libp2p/peer-id" "^5.0.10"
+    "@libp2p/peer-record" "^8.0.14"
+    "@libp2p/utils" "^6.3.1"
+    "@multiformats/multiaddr" "^12.3.3"
+    "@multiformats/multiaddr-matcher" "^1.6.0"
+    any-signal "^4.1.1"
+    it-protobuf-stream "^1.1.5"
+    it-stream-types "^2.0.2"
+    multiformats "^13.3.1"
+    nanoid "^5.0.9"
+    progress-events "^1.0.1"
+    protons-runtime "^5.5.0"
+    retimeable-signal "^1.0.0"
+    uint8arraylist "^2.4.8"
+    uint8arrays "^5.1.0"
 
 "@libp2p/crypto@^5.0.0", "@libp2p/crypto@^5.0.9":
   version "5.0.9"
@@ -344,6 +386,24 @@
     uint8arraylist "^2.4.8"
     uint8arrays "^5.1.0"
 
+"@libp2p/websockets@^9.1.2":
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/@libp2p/websockets/-/websockets-9.1.2.tgz#1486d721d1428394d37709861830654f1d264634"
+  integrity sha512-F5PbGRP6jGkEd1zHm4PFAfiHWS/+NMYTfEhZtYMT4KDl+J4Jn4d//b0N+f7gVDIPXv8F9OKldrnKaxkoy6Ve1Q==
+  dependencies:
+    "@libp2p/interface" "^2.4.0"
+    "@libp2p/utils" "^6.3.1"
+    "@multiformats/multiaddr" "^12.3.3"
+    "@multiformats/multiaddr-matcher" "^1.6.0"
+    "@multiformats/multiaddr-to-uri" "^11.0.0"
+    "@types/ws" "^8.5.13"
+    it-ws "^6.1.5"
+    p-defer "^4.0.1"
+    p-event "^6.0.1"
+    progress-events "^1.0.1"
+    race-signal "^1.1.0"
+    ws "^8.18.0"
+
 "@mapbox/node-pre-gyp@1.0.9":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.9.tgz#09a8781a3a036151cdebbe8719d6f8b25d4058bc"
@@ -388,6 +448,13 @@
     "@multiformats/multiaddr" "^12.0.0"
     multiformats "^13.0.0"
 
+"@multiformats/multiaddr-to-uri@^11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@multiformats/multiaddr-to-uri/-/multiaddr-to-uri-11.0.0.tgz#ec0ee9494f1cfc6ccd5173e61bbb0b6722029e97"
+  integrity sha512-9RNmlIGwZbBLsHekT50dbt4o4u8Iciw9kGjv+WHiGxQdsJ6xKKjU1+C0Vbas6RilMbaVOAOnEyfNcXbUmTkLxQ==
+  dependencies:
+    "@multiformats/multiaddr" "^12.3.0"
+
 "@multiformats/multiaddr@^10.1.5":
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/@multiformats/multiaddr/-/multiaddr-10.5.0.tgz#2651e974c8d2dccc8f1612880987f44b33406bb4"
@@ -400,7 +467,7 @@
     uint8arrays "^3.0.0"
     varint "^6.0.0"
 
-"@multiformats/multiaddr@^12.0.0", "@multiformats/multiaddr@^12.1.14", "@multiformats/multiaddr@^12.3.3":
+"@multiformats/multiaddr@^12.0.0", "@multiformats/multiaddr@^12.1.14", "@multiformats/multiaddr@^12.3.0", "@multiformats/multiaddr@^12.3.3":
   version "12.3.4"
   resolved "https://registry.yarnpkg.com/@multiformats/multiaddr/-/multiaddr-12.3.4.tgz#3dd3d7d76f95ce9c8768770e8008a99de9b7ba49"
   integrity sha512-R4pEEUyWGrRo16TSflz80Yr6XNbPirix1pfPqDLXsDZ4aaIrhZ7cez9jnyRQgci6DuuqSyZAdJKV6SdxpZ7Oiw==
@@ -631,6 +698,13 @@
   version "8.1.5"
   resolved "https://registry.yarnpkg.com/@types/sinonjs__fake-timers/-/sinonjs__fake-timers-8.1.5.tgz#5fd3592ff10c1e9695d377020c033116cc2889f2"
   integrity sha512-mQkU2jY8jJEF7YHjHvsQO8+3ughTL1mcnn96igfhONmR+fUPSKIkefQYpSe8bsly2Ep7oQbn/6VG5/9/0qcArQ==
+
+"@types/ws@^8.2.2", "@types/ws@^8.5.13":
+  version "8.5.14"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-8.5.14.tgz#93d44b268c9127d96026cf44353725dd9b6c3c21"
+  integrity sha512-bd/YFLW+URhBzMXurx7lWByOu+xzU9+kb3RboOteXYDfW+tr+JZa99OyNmPINEGB/ahzKrEuc8rcv4gnpJmxTw==
+  dependencies:
+    "@types/node" "*"
 
 "@webgpu/types@0.1.38":
   version "0.1.38"
@@ -1135,6 +1209,11 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
+
+event-iterator@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/event-iterator/-/event-iterator-2.0.0.tgz#10f06740cc1e9fd6bc575f334c2bc1ae9d2dbf62"
+  integrity sha512-KGft0ldl31BZVV//jj+IAIGCxkvvUkkON+ScH6zfoX+l+omX6001ggyRSpI0Io2Hlro0ThXotswCtfzS8UkIiQ==
 
 eventemitter3@^5.0.1:
   version "5.0.1"
@@ -1673,6 +1752,17 @@ it-take@^3.0.6:
   resolved "https://registry.yarnpkg.com/it-take/-/it-take-3.0.6.tgz#509283b69b88f823350b256392525267609f1925"
   integrity sha512-uqw3MRzf9to1SOLxaureGa73lK8k8ZB/asOApTAkvrzUqCznGtKNgPFH7uYIWlt4UuWq/hU6I+U4Fm5xpjN8Vg==
 
+it-ws@^6.1.5:
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/it-ws/-/it-ws-6.1.5.tgz#317db04256f3d54b891a4d29110df25d72016def"
+  integrity sha512-uWjMtpy5HqhSd/LlrlP3fhYrr7rUfJFFMABv0F5d6n13Q+0glhZthwUKpEAVhDrXY95Tb1RB5lLqqef+QbVNaw==
+  dependencies:
+    "@types/ws" "^8.2.2"
+    event-iterator "^2.0.0"
+    it-stream-types "^2.0.1"
+    uint8arrays "^5.0.0"
+    ws "^8.4.0"
+
 jackspeak@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/jackspeak/-/jackspeak-4.0.2.tgz#11f9468a3730c6ff6f56823a820d7e3be9bef015"
@@ -1874,6 +1964,11 @@ nanoid@^3.0.2:
   version "3.3.8"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.8.tgz#b1be3030bee36aaff18bacb375e5cce521684baf"
   integrity sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==
+
+nanoid@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-5.0.9.tgz#977dcbaac055430ce7b1e19cf0130cea91a20e50"
+  integrity sha512-Aooyr6MXU6HpvvWXKoVoXwKMs/KyVakWwg7xQfv5/S/RIgJMy0Ifa45H9qqYy7pTCszrHzP21Uk4PZq2HpEM8Q==
 
 native-fetch@^3.0.0:
   version "3.0.0"
@@ -2146,6 +2241,11 @@ require-directory@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/require-directory/-/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==
+
+retimeable-signal@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/retimeable-signal/-/retimeable-signal-1.0.1.tgz#4df862708bd99a222655265358adc2698cdcbece"
+  integrity sha512-Cy26CYfbWnYu8HMoJeDhaMpW/EYFIbne3vMf6G9RSrOyWYXbPehja/BEdzpqmM84uy2bfBD7NPZhoQ4GZEtgvg==
 
 retry@^0.13.1:
   version "0.13.1"
@@ -2574,6 +2674,11 @@ wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"
   integrity sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==
+
+ws@^8.18.0, ws@^8.4.0:
+  version "8.18.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.0.tgz#0d7505a6eafe2b0e712d232b42279f53bc289bbc"
+  integrity sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==
 
 y18n@^5.0.5:
   version "5.0.8"

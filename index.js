@@ -9,7 +9,11 @@ import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { identify, identifyPush } from '@libp2p/identify'
 import { peerList } from '@libp2p/peer-list'
 import { bootstrap } from '@libp2p/bootstrap'
+import { webSockets } from '@libp2p/websockets'
 import { readFileSync, writeFileSync } from 'node:fs'
+import { circuitRelayServer } from '@libp2p/circuit-relay-v2'
+import { autoNAT } from '@libp2p/autonat'
+
 require('dotenv').config()
 const express = require('express')
 const nunjucks = require("nunjucks")
@@ -22,7 +26,6 @@ const { newPost, processChunk, getPost, chunkMessage, rankPosts, postOK } = requ
 const cookieParser = require('cookie-parser');
 const geolib = require('geolib');
 const geoIp2 = require('geoip-lite2');
-const port = 3000;
 var messageBuffer = {};
 
 app.use(cookieParser());
@@ -45,8 +48,11 @@ async function getReplies(postId) {
         addresses: {
             listen: ['/ip6/::1/tcp/0']
         },
-        transports: [tcp()],
+        transports: [tcp(), webSockets()],
         connectionEncrypters: [noise()],
+        connectionGater: {
+            denyDialMultiaddr: async () => false,
+        },
         services: {
             ping: ping({
                 protocolPrefix: 'ipfs',
@@ -58,7 +64,9 @@ async function getReplies(postId) {
                 maxInboundDataLength: 1024 * 8,
                 enabled: true,
                 globalSignaturePolicy: "StrictSign",
-            })
+            }),
+            autoNat: autoNAT(),
+            relay: circuitRelayServer(),
         },
         streamMuxers: [yamux({
             enableKeepAlive: true,
@@ -70,7 +78,6 @@ async function getReplies(postId) {
     console.log('libp2p has started')
     console.log('listening on addresses:')
     node.getMultiaddrs().forEach((addr) => {
-        writeFileSync("cid", addr.toString())
         console.log(addr.toString())
     })
     node.services.pubsub.addEventListener('message', async (message) => {
@@ -122,7 +129,7 @@ async function getReplies(postId) {
         posts = posts.sort(function (a, b) {
             return new Date(b.createdAt) - new Date(a.createdAt);
         });
-        posts = posts.filter(post=>!post.parent)
+        posts = posts.filter(post => !post.parent)
         res.render("global.njk", { posts, lat, lon, notice, peers: node.peerStore.all().length, env: process.env })
     })
     app.get('/', async (req, res) => {
@@ -144,7 +151,7 @@ async function getReplies(postId) {
             post.mi = geolib.convertDistance(distance, "mi").toFixed(2)
             return post
         })
-        posts = posts.filter(post=>!post.parent)
+        posts = posts.filter(post => !post.parent)
         posts = rankPosts(posts, lat, lon).toReversed()
         res.render("index.njk", { posts, lat, lon, notice, peers: (await node.peerStore.all()).length, env: process.env })
     })
@@ -191,7 +198,7 @@ async function getReplies(postId) {
         }));
         res.redirect(`/posts/${JSON.parse(packet).id}`)
     });
-    app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`)
+    const listener = app.listen(process.env.PORT || 3000, () => {
+        console.log(`Pasture listening on port ${listener.address().port}`)
     })
 })();
