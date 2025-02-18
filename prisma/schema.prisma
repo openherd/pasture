@@ -19,4 +19,6 @@ model Post {
     publicKey  String
     privateKey String? // Only if you're the OP
     parent     String?
+    signature  String
+    raw        String // raw post
 }
