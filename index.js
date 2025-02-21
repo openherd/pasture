@@ -3,18 +3,14 @@ import { createLibp2p } from "libp2p";
 import { tcp } from "@libp2p/tcp";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { multiaddr } from "multiaddr";
 import { ping } from "@libp2p/ping";
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { identify, identifyPush } from "@libp2p/identify";
-import { peerList } from "@libp2p/peer-list";
-import { bootstrap } from "@libp2p/bootstrap";
+import { multiaddr } from '@multiformats/multiaddr'
 import { webSockets } from "@libp2p/websockets";
 import { circuitRelayServer } from "@libp2p/circuit-relay-v2";
 import { autoNAT } from "@libp2p/autonat";
 import dotenv from "dotenv";
-import { keys } from "@libp2p/crypto";
-import { readFileSync, writeFileSync, existsSync } from "fs";
 dotenv.config();
 
 import express from "express";
@@ -30,17 +26,13 @@ import {
   chunkMessage,
   rankPosts,
   postOK,
-  isBase64,
 } from "./utils.js";
 import cookieParser from "cookie-parser";
 import geolib from "geolib";
 import geoIp2 from "geoip-lite2";
-import detectCharacterEncoding from "detect-character-encoding";
-import { RPC } from "@chainsafe/libp2p-gossipsub/message";
-
+import config from "./config.json" with { type: "json" };
 const app = express();
 var messageBuffer = {};
-const KEY_PATH = "./peer-key.pem";
 
 app.use(cookieParser());
 app.set("trust proxy", (ip) => {
@@ -58,9 +50,17 @@ async function getReplies(postId) {
 }
 
 (async () => {
+  const publicIp = process.env.PUBLIC_IP || (await (await fetch('https://api.ipify.org?format=json')).json()).ip
   const node = await createLibp2p({
     addresses: {
-      listen: ["/ip6/::1/tcp/0", "/ip4/0.0.0.0/tcp/9003/ws"],
+      listen: [
+        `/ip4/0.0.0.0/tcp/${process.env.REGULAR_PORT}`,
+        `/ip4/0.0.0.0/tcp/${process.env.WS_PORT}/ws`  
+    ],
+    announce: [
+        `/ip4/${publicIp}/tcp/${process.env.REGULAR_PORT}`,
+        `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`  
+    ]
     },
     transports: [webSockets(), tcp()],
     connectionEncrypters: [noise()],
@@ -98,6 +98,18 @@ async function getReplies(postId) {
   });
   node.services.pubsub.subscribe("catchup");
 
+  function discover(){
+    config.bootstrappingServers.map(async server=>{
+      try {
+        const listeners = await (await fetch(`${server}/api/listeners`)).json()
+      listeners.forEach(async l=>await node.dial(multiaddr(l)))
+      } catch(e){
+        
+      }
+    })
+  }
+  discover()
+  setInterval(discover,1000*30)
   node.services.pubsub.addEventListener("message", async (message) => {
     const sender = message.detail.from;
     var data = new TextDecoder().decode(message.detail.data);
@@ -231,7 +243,14 @@ async function getReplies(postId) {
       env: process.env,
     });
   });
-
+  setInterval(async function () {
+    await node.services.pubsub.publish(
+      "ping",
+      new TextEncoder().encode(
+        "pong"
+      ),
+    );
+  }, 30 * 1000)
   app.get("/new", async (req, res) => {
     res.render("new.njk", { peers: (await node.peerStore.all()).length });
   });
@@ -243,6 +262,15 @@ async function getReplies(postId) {
       post,
       peers: (await node.peerStore.all()).length,
     });
+  });
+  app.get("/api/discovery", async (req, res) => {
+    const connections = node.getConnections();
+    const peerAddresses = connections.map(conn => {
+      const peerId = conn.remotePeer.toString();
+      const multiaddr = conn.remoteAddr.toString();
+      return `${multiaddr}/p2p/${peerId}`;
+    });
+    res.json(peerAddresses);
   });
   app.get("/connect", async (req, res) => {
     res.render("connect.njk", {
