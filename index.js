@@ -151,7 +151,12 @@ async function getReplies(postId) {
   });
   node.services.pubsub.subscribe("browser-peer-discovery");
   node.services.pubsub.subscribe("posts");
-
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    next();
+});
   app.use(express.static("public"));
   app.use(bodyParser.urlencoded({ extended: true }));
 
