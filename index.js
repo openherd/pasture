@@ -55,12 +55,12 @@ async function getReplies(postId) {
     addresses: {
       listen: [
         `/ip4/0.0.0.0/tcp/${process.env.REGULAR_PORT}`,
-        `/ip4/0.0.0.0/tcp/${process.env.WS_PORT}/ws`  
-    ],
-    announce: [
+        `/ip4/0.0.0.0/tcp/${process.env.WS_PORT}/ws`
+      ],
+      announce: [
         `/ip4/${publicIp}/tcp/${process.env.REGULAR_PORT}`,
-        `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`  
-    ]
+        `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`
+      ]
     },
     transports: [webSockets(), tcp()],
     connectionEncrypters: [noise()],
@@ -98,18 +98,35 @@ async function getReplies(postId) {
   });
   node.services.pubsub.subscribe("catchup");
 
-  function discover(){
-    config.bootstrappingServers.map(async server=>{
+  function discover() {
+    config.bootstrappingServers.map(async server => {
       try {
         const listeners = await (await fetch(`${server}/api/listeners`)).json()
-      listeners.forEach(async l=>await node.dial(multiaddr(l)))
-      } catch(e){
-        
+        const wsConnections = [];
+        const tcpConnections = [];
+
+        listeners.forEach(multiaddr => {
+          if (multiaddr.includes('/ws')) {
+            wsConnections.push(multiaddr);
+          } else {
+            tcpConnections.push(multiaddr);
+          }
+        });
+        const peerAddresses = [...wsConnections, ...tcpConnections];
+        for (const l of peerAddresses) {
+          try {
+            await node.dial(multiaddr(l));
+            break;
+          } catch (e) {
+          }
+        }
+      } catch (e) {
+        console.error(e)
       }
     })
   }
   discover()
-  setInterval(discover,1000*30)
+  setInterval(discover, 1000 * 30)
   node.services.pubsub.addEventListener("message", async (message) => {
     const sender = message.detail.from;
     var data = new TextDecoder().decode(message.detail.data);
@@ -156,7 +173,7 @@ async function getReplies(postId) {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     next();
-});
+  });
   app.use(express.static("public"));
   app.use(bodyParser.urlencoded({ extended: true }));
 
