@@ -60,7 +60,7 @@ async function getReplies(postId) {
       announce: [
         `/ip4/${publicIp}/tcp/${process.env.REGULAR_PORT}`,
         `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`,
-        `/dns4/${process.env.DNS_HOSTNAME}/dns4/${process.env.WS_PORT}/wss`
+        `/dns4/${process.env.DNS_HOSTNAME}/tcp/${process.env.WS_PORT}/wss`
       ]
     },
     transports: [webSockets(), tcp()],
@@ -115,7 +115,7 @@ async function getReplies(postId) {
             tcpConnections.push(multiaddr);
           }
         });
-        const peerAddresses = [...wsdnsConnections,...wsConnections, ...tcpConnections];
+        const peerAddresses = [...wsdnsConnections];
         for (const l of peerAddresses) {
           try {
             await node.dial(multiaddr(l));
@@ -138,7 +138,7 @@ async function getReplies(postId) {
             tcpConnections.push(multiaddr);
           }
         });
-        const peerAddresses = [...wsConnections, ...tcpConnections];
+        const peerAddresses = [...wsConnections];
         for (const l of peerAddresses) {
           try {
             await node.dial(multiaddr(l));
