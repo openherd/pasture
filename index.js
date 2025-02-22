@@ -339,13 +339,29 @@ async function getReplies(postId) {
   });
   app.get("/api/discovery", async (req, res) => {
     const connections = node.getConnections();
-    const peerAddresses = connections.map(conn => {
-      const peerId = conn.remotePeer.toString();
-      const multiaddr = conn.remoteAddr.toString();
-      return `${multiaddr}/p2p/${peerId}`;
+    const wsdnsConnections = [];
+    const wsConnections = [];
+    const tcpConnections = [];
+
+    connections.forEach(conn => {
+        const multiaddr = conn.remoteAddr.toString();
+        if (multiaddr.includes('/wss') && (multiaddr.includes('/dns4') || multiaddr.includes('/dns6'))) {
+            wsdnsConnections.push(multiaddr);
+        } else if (multiaddr.includes('/ws')) {
+            wsConnections.push(multiaddr);
+        } else {
+            tcpConnections.push(multiaddr);
+        }
     });
+
+    const peerAddresses = [...wsdnsConnections, ...wsConnections, ...tcpConnections];
     res.json(peerAddresses);
-  });
+});
+  app.get("/api/listeners", async (req, res) => {
+    res.json(node.getMultiaddrs().map((addr) => {
+        return addr.toString()
+    }));
+});
   app.get("/connect", async (req, res) => {
     res.render("connect.njk", {
       peers: (await node.peerStore.all()).length,
