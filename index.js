@@ -235,10 +235,15 @@ async function getReplies(postId) {
       !req.ip.includes("::1")
     ) {
       var geoloc = geoIp2.lookup(req.ip);
-      notice = `<b>N.B.</b> Your location (${geoloc.city}) was inferred using your IP address. We did not send your IP to any external service; instead, it was determined locally.`;
-      lat = geoloc?.ll[0];
-      lon = geoloc?.ll[1];
-    } else {
+      if (geoloc) {
+        notice = `<b>N.B.</b> Your location (${geoloc.city}) was inferred using your IP address. We did not send your IP to any external service; instead, it was determined locally.`;
+        lat = geoloc.ll[0];
+        lon = geoloc.ll[1];
+      } else {
+        lat = 0;
+        lon = 0;
+      }
+    } else if (!lat || !lon) {
       lat = 0;
       lon = 0;
     }
@@ -253,7 +258,9 @@ async function getReplies(postId) {
       return post;
     });
     posts = posts.filter((post) => !post.parent);
-    res.render("index.njk", {
+    posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
+
+    res.render("global.njk", {
       posts,
       lat,
       lon,
@@ -264,6 +271,7 @@ async function getReplies(postId) {
   });
   app.get("/", async (req, res) => {
     var { lat, lon } = req.cookies;
+    console.log(lat,lon)
     var notice = null;
     if (
       (!lat || !lon) &&
@@ -271,10 +279,15 @@ async function getReplies(postId) {
       !req.ip.includes("::1")
     ) {
       var geoloc = geoIp2.lookup(req.ip);
-      notice = `<b>N.B.</b> Your location (${geoloc.city}) was inferred using your IP address. We did not send your IP to any external service; instead, it was determined locally.`;
-      lat = geoloc?.ll[0];
-      lon = geoloc?.ll[1];
-    } else {
+      if (geoloc) {
+        notice = `<b>N.B.</b> Your location (${geoloc.city}) was inferred using your IP address. We did not send your IP to any external service; instead, it was determined locally.`;
+        lat = geoloc.ll[0];
+        lon = geoloc.ll[1];
+      } else {
+        lat = 0;
+        lon = 0;
+      }
+    } else if (!lat || !lon) {
       lat = 0;
       lon = 0;
     }
