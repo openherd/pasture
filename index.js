@@ -55,11 +55,12 @@ async function getReplies(postId) {
     addresses: {
       listen: [
         `/ip4/0.0.0.0/tcp/${process.env.REGULAR_PORT}`,
-        `/ip4/0.0.0.0/tcp/${process.env.WS_PORT}/ws`
+        `/ip4/0.0.0.0/tcp/${process.env.WS_PORT}/ws`,
       ],
       announce: [
         `/ip4/${publicIp}/tcp/${process.env.REGULAR_PORT}`,
-        `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`
+        `/ip4/${publicIp}/tcp/${process.env.WS_PORT}/ws`,
+        `/dns4/${process.env.DNS_HOSTNAME}/dns4/${process.env.WS_PORT}/wss`
       ]
     },
     transports: [webSockets(), tcp()],
