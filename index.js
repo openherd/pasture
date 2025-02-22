@@ -97,7 +97,6 @@ async function getReplies(postId) {
   node.getMultiaddrs().forEach((addr) => {
     console.log(addr.toString());
   });
-  node.services.pubsub.subscribe("catchup");
 
   function discover() {
     config.bootstrappingServers.map(async server => {
@@ -203,6 +202,9 @@ async function getReplies(postId) {
   });
   node.services.pubsub.subscribe("browser-peer-discovery");
   node.services.pubsub.subscribe("posts");
+  node.services.pubsub.subscribe("catchup");
+  node.services.pubsub.subscribe("backlog");
+
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
