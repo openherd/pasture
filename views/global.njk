@@ -13,7 +13,7 @@
                     <blockquote>
                         <p>{{ post.text }}</p>
                     </blockquote>
-                    <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                    <p><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
                     </p>
                 </details>
             {% elif env.MODERATE_POSTS == "hide" and post.moderated %}
@@ -21,7 +21,7 @@
                 <blockquote>
                     <p>{{ post.text }}</p>
                 </blockquote>
-                <p>{{ post.km }}km ({{ post.mi}}mi) away approx. &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                <p><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
                 </p>
                 <hr>
             {% endif %}

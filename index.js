@@ -271,7 +271,6 @@ async function getReplies(postId) {
   });
   app.get("/", async (req, res) => {
     var { lat, lon } = req.cookies;
-    console.log(lat,lon)
     var notice = null;
     if (
       (!lat || !lon) &&

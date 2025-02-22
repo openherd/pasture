@@ -9,11 +9,19 @@
         <meta charset="utf-8"/>
         <title>Openherd</title>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="/utils.js"></script>
 
         <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/holiday.css@0.11.2"
 />
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+        <script src="https://cdn.jsdelivr.net/npm/@simondmc/popup-js@1.4.3/popup.min.js"></script>
     </head>
     <body>
         <header>
@@ -30,7 +38,7 @@
                 <li>
                     <a href="/new" id="new-link">&plus; New Post</a>
                 </li>
- <li>
+                <li>
                     <a href="/connect" id="connect-link">Connect to this instance</a>
                 </li>
             </ul>
@@ -58,7 +66,8 @@
             {% block main %}{% endblock %}
         </main>
         <footer>
-      &copy; 2025 Openyak, AGPL 3.0. &bull; Connected to <b>{{ peers }} </b> peer(s).
+      &copy; 2025 Openyak, AGPL 3.0. &bull; Connected to <b>{{ peers }}
+            </b> peer(s).
         </footer>
     </body>
 </html>
