@@ -104,15 +104,18 @@ async function getReplies(postId) {
         const listeners = await (await fetch(`${server}/api/listeners`)).json()
         const wsConnections = [];
         const tcpConnections = [];
+        const wsdnsConnections = [];
 
         listeners.forEach(multiaddr => {
-          if (multiaddr.includes('/ws')) {
+          if (multiaddr.includes('/wss') && (multiaddr.includes('/dns4') || multiaddr.includes('/dns6'))) {
+            wsdnsConnections.push(multiaddr);
+          } else if (multiaddr.includes('/ws')) {
             wsConnections.push(multiaddr);
           } else {
             tcpConnections.push(multiaddr);
           }
         });
-        const peerAddresses = [...wsConnections, ...tcpConnections];
+        const peerAddresses = [...wsdnsConnections,...wsConnections, ...tcpConnections];
         for (const l of peerAddresses) {
           try {
             await node.dial(multiaddr(l));
