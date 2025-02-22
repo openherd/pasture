@@ -139,7 +139,6 @@ async function getReplies(postId) {
         for (const l of peerAddresses) {
           try {
             await node.dial(multiaddr(l));
-            break;
           } catch (e) {
           }
         }
