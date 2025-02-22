@@ -123,10 +123,45 @@ async function getReplies(postId) {
       } catch (e) {
         console.error(e)
       }
+      try {
+        const discovery = await (await fetch(`${server}/api/discovery`)).json()
+        const wsConnections = [];
+        const tcpConnections = [];
+
+        discovery.forEach(multiaddr => {
+          if (multiaddr.includes('/ws')) {
+            wsConnections.push(multiaddr);
+          } else {
+            tcpConnections.push(multiaddr);
+          }
+        });
+        const peerAddresses = [...wsConnections, ...tcpConnections];
+        for (const l of peerAddresses) {
+          try {
+            await node.dial(multiaddr(l));
+            break;
+          } catch (e) {
+          }
+        }
+      } catch (e) {
+        console.error(e)
+      }
     })
   }
-  discover()
+  const catchUp = async () => {
+    let peers = node.services.pubsub
+    if (!peers) return;
+    const chunks = chunkMessage(JSON.stringify({}));
+    await Promise.all(chunks.map(async (chunk, index) => {
+      const packet = { index, total: chunks.length, content: chunk };
+      const readyToSend = new TextEncoder().encode(JSON.stringify(packet));
+      const a = await node.services.pubsub.publish("catchup", readyToSend);
+    }));
+  };
+  await discover()
+  await catchUp()
   setInterval(discover, 1000 * 30)
+  setInterval(catchUp, 1000 * 1)
   node.services.pubsub.addEventListener("message", async (message) => {
     const sender = message.detail.from;
     var data = new TextDecoder().decode(message.detail.data);
@@ -304,8 +339,9 @@ async function getReplies(postId) {
     const { id } = req.body;
     if (!id) res.send("Give an address");
     try {
-      await node.dial(id);
+      await node.dial(multiaddr(id));
     } catch (e) {
+      console.error(e)
       return res.send("Failed to dial");
     }
     return res.send("Dial complete.");
