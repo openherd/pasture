@@ -56,14 +56,15 @@ window.showMap = function (latitude, longitude) {
     .bindPopup('Approx. Location')
     .openPopup();
 }
-window.getUserLocation = function (position) {
+window.getUserLocation = function (position, auto) {
   const { latitude, longitude } = window.skewLocation(position.coords.latitude, position.coords.longitude)
   sessionStorage.setItem("lat", latitude)
   sessionStorage.setItem("lon", longitude)
   document.cookie = "lat=" + latitude + "; path=/";
   document.cookie = "lon=" + longitude + "; path=/";
+  if (auto) window.location.reload();
 }
 if (location.pathname != "/new" && (!document.cookie.includes("lat") || !document.cookie.includes("lon"))) {
-  navigator.geolocation.getCurrentPosition(getUserLocation);
-  window.location.reload();
+  navigator.geolocation.getCurrentPosition(function (a) { getUserLocation(a, true) });
+
 }
