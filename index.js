@@ -344,24 +344,24 @@ async function getReplies(postId) {
     const tcpConnections = [];
 
     connections.forEach(conn => {
-        const multiaddr = conn.remoteAddr.toString();
-        if (multiaddr.includes('/wss') && (multiaddr.includes('/dns4') || multiaddr.includes('/dns6'))) {
-            wsdnsConnections.push(multiaddr);
-        } else if (multiaddr.includes('/ws')) {
-            wsConnections.push(multiaddr);
-        } else {
-            tcpConnections.push(multiaddr);
-        }
+      const multiaddr = conn.remoteAddr.toString();
+      if (multiaddr.includes('/wss') && (multiaddr.includes('/dns4') || multiaddr.includes('/dns6'))) {
+        wsdnsConnections.push(multiaddr);
+      } else if (multiaddr.includes('/ws')) {
+        wsConnections.push(multiaddr);
+      } else {
+        tcpConnections.push(multiaddr);
+      }
     });
 
     const peerAddresses = [...wsdnsConnections, ...wsConnections, ...tcpConnections];
     res.json(peerAddresses);
-});
+  });
   app.get("/api/listeners", async (req, res) => {
     res.json(node.getMultiaddrs().map((addr) => {
-        return addr.toString()
+      return addr.toString()
     }));
-});
+  });
   app.get("/connect", async (req, res) => {
     res.render("connect.njk", {
       peers: (await node.peerStore.all()).length,
@@ -408,6 +408,42 @@ async function getReplies(postId) {
       }),
     );
     res.redirect(`/post/${JSON.parse(packet).id}`);
+  });
+  app.get("/_openherd/outbox", async (req, res) => {
+    const { max } = req.query
+    if (max && typeof max != "number") return []
+    const posts = (await utils.catchUp({ max })).map(m=>JSON.parse(m))
+    res.json(posts)
+  });
+  app.post("/_openherd/inbox", async (req, res) => {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json({ error: "Expected an array of posts" });
+    }
+    try {
+      for (const post of req.body) {
+        post
+        const packet = JSON.stringify(post);
+        const chunks = chunkMessage(packet);
+        await Promise.all(
+          chunks.map(async (chunk, index) => {
+            await node.services.pubsub.publish(
+              "posts",
+              new TextEncoder().encode(
+                JSON.stringify({
+                  index,
+                  total: chunks.length,
+                  content: chunk,
+                }),
+              ),
+            );
+          }),
+        );
+      }
+      res.json({ status: "ok", count: req.body.length });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: "Failed to send posts" });
+    }
   });
   const listener = app.listen(process.env.PORT || 3000, () => {
     console.log(`Pasture listening on port ${listener.address().port}`);
