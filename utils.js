@@ -49,8 +49,6 @@ export async function importPost({
   signature,
   publicKey,
   data,
-  node,
-  from,
   raw,
 }) {
   const key = await openpgp.readKey({
@@ -98,7 +96,6 @@ export async function importPost({
     }
   } catch (e) {
     console.error("Signature verification failed:", e);
-    await node.hangUp(from);
   }
   return null;
 }

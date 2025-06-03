@@ -33,7 +33,7 @@ import geoIp2 from "geoip-lite2";
 import config from "./config.json" with { type: "json" };
 const app = express();
 var messageBuffer = {};
-
+app.use(express.json())
 app.use(cookieParser());
 app.set("trust proxy", (ip) => {
   if (ip === "127.0.0.1" || ip === "::1") return true;
@@ -368,16 +368,33 @@ async function getReplies(postId) {
       id: node.getMultiaddrs().join("\n").trim(),
     });
   });
-  app.post("/request-peering", async (req, res) => {
-    const { id } = req.body;
-    if (!id) res.send("Give an address");
+  app.post("/_openherd/sync", async (req, res) => {
+    const { address } = req.body;
+    if (!address) return res.status(400).send({ ok: false, error: "You must specify an address"});
     try {
-      await node.dial(multiaddr(id));
-    } catch (e) {
-      console.error(e)
-      return res.send("Failed to dial");
+      const origin = new URL(address).origin;
+      (await (await fetch(`${origin}/_openherd/outbox`)).json()).map(async post => {
+        await utils.importPost({
+          signature: post.signature,
+          publicKey: post.publicKey,
+          data: post.data,
+          raw: JSON.stringify(post),
+        })
+      })
+      await fetch(`${origin}/_openherd/inbox`, {
+        method: "POST",
+        body: JSON.stringify((await utils.catchUp({ max: 10000 })).map(m => JSON.parse(m)))
+      })
+      return res.json({ ok: true, message: "Sync complete"})
+    } catch {
+
     }
-    return res.send("Dial complete.");
+    try {
+      await node.dial(multiaddr(address));
+    } catch (e) {
+      return res.status(500).send({ ok: false, error: "Failed to dial multiaddr"});
+    }
+    return res.send({ ok: true, message: "Multiaddr dial complete"});
   });
   app.post("/new", async (req, res) => {
     const { text } = req.body;
@@ -412,7 +429,7 @@ async function getReplies(postId) {
   app.get("/_openherd/outbox", async (req, res) => {
     const { max } = req.query
     if (max && typeof max != "number") return []
-    const posts = (await utils.catchUp({ max })).map(m=>JSON.parse(m))
+    const posts = (await utils.catchUp({ max })).map(m => JSON.parse(m))
     res.json(posts)
   });
   app.post("/_openherd/inbox", async (req, res) => {
@@ -439,10 +456,10 @@ async function getReplies(postId) {
           }),
         );
       }
-      res.json({ status: "ok", count: req.body.length });
+      res.json({ ok: true, count: req.body.length });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: "Failed to send posts" });
+     
+      res.status(500).json({ ok: false, error: "Failed to send posts" });
     }
   });
   const listener = app.listen(process.env.PORT || 3000, () => {
