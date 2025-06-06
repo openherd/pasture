@@ -437,8 +437,13 @@ async function getReplies(postId) {
       return res.status(400).json({ error: "Expected an array of posts" });
     }
     try {
-      for (const post of req.body) {
-        post
+      for (var post of req.body) {
+        if (typeof post =="string") post = JSON.parse(post)
+        utils.importPost({
+        ...post,
+        raw: JSON.stringify(post)
+         
+      });
         const packet = JSON.stringify(post);
         const chunks = chunkMessage(packet);
         await Promise.all(
@@ -458,7 +463,6 @@ async function getReplies(postId) {
       }
       res.json({ ok: true, count: req.body.length });
     } catch (e) {
-     
       res.status(500).json({ ok: false, error: "Failed to send posts" });
     }
   });
