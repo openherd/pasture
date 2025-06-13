@@ -112,8 +112,8 @@ export async function newPost({ latitude, longitude, text, parent, node }) {
   const postDate = new Date();
 
   const { privateKey, publicKey } = await openpgp.generateKey({
-    type: "rsa",
-    rsaBits: 4096,
+    type: "curve25519",
+  
     userIDs: [{ name: "Anon", email: "anon@example.com" }],
     passphrase: "post",
   });
