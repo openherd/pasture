@@ -1,8 +1,9 @@
 {% extends "parent.njk" %}
 
 {% block main %}
+    <p>OpenHerd is a decentralized, anonymous, location-based message board designed for local conversation without centralized control. You do not need to register an account before participating in the network. <a href="https://openherd.network" target="_blank">You may learn more at openherd.network</a>.</p>
+    
     <h1>Local feed</h1>
-    <p>Welcome to Openherd! This is a peer-to-peer YikYak alternative. Peer-to-peer makes it much harder to take down as well. This feed take the location and the time it was posted into account.</p>
     {{ notice | safe }}
     {% if posts %}{% endif %}
 
@@ -18,7 +19,7 @@
                     <p><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
                     </p>
                 </details>
-            {% elif env.MODERATE_POSTS == "hide" and post.moderated%}
+            {% elif env.MODERATE_POSTS == "hide" and post.moderate %}
 
             {% else %}
                 <blockquote>
