@@ -1,9 +1,34 @@
 {% extends "parent.njk" %}
 
 {% block main %}
-    <p>OpenHerd is a decentralized, anonymous, location-based message board designed for local conversation without centralized control. You do not need to register an account before participating in the network. <a href="https://openherd.network" target="_blank">You may learn more at openherd.network</a>.</p>
     
-    <h1>Local feed</h1>
+
+    <h1 id="top" class="h3 lh-base mb-1">{{ title }}</h1>
+    <p>{{ description }}</p>
+
+    <div class="card" style="width: 100%;">
+
+  <div class="card-body">
+
+    <h5 class="card-title">New Post</h5>
+
+    <p class="card-text">
+
+   <form action="/new" method="POST">
+        <textarea type="text" class="form-control form-control-lg" placeholder="Whatcha thinkin' about?" name="text" aria-label="Large input example"></textarea>
+        <input name="lat" style="display:none;"></input>
+        <input name="lon" style="display:none;"></input>
+    <br>
+    <button type="button" class="btn btn-primary"  disabled="true" id="submit">Post</button>
+<p id="status"></p>
+   </form>
+
+    </p>
+
+  </div>
+  <div class="card-footer"><a href="https://openherd.network/legal/">tl;dr privacy</a> &bull; <a href="https://openherd.network/">what is this?</a> &bull; <a href="https://openherd.network/privacy-policy/">privacy policy</a></div>
+</div>
+
     {{ notice | safe }}
     {% if posts %}{% endif %}
 
@@ -16,23 +41,54 @@
                     <blockquote>
                         <p>{{ post.text }}</p>
                     </blockquote>
-                    <p><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
+                    <p>
+                        <abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
                     </p>
                 </details>
             {% elif env.MODERATE_POSTS == "hide" and post.moderate %}
 
             {% else %}
-                <blockquote>
-                    <p>{{ post.text }}</p>
-                </blockquote>
-                <p><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.km }}km ({{ post.mi}}mi) away approx.</abbr> &bull; <a href="/post/{{post.id}}">View replies</a> &bull; <time datetime="{{ post.createdAt }}">{{ post.createdAt | getLocaleDate(post.createdAt) }} ({{ post.createdAt | getPrettyDate(post.createdAt) }})</time>
-                </p>
-                <hr>
+            <div style="padding-top:1%;">
+                <div class="card" style="width: 100%;">
+
+                    <div class="card-header"><abbr title="Show approx location" onclick="window.showMap({{ post.latitude }}, {{ post.longitude }})">{{ post.mi}}mi away approx.</abbr> &bull; <abbr title="{{ post.createdAt | getLocaleDate(post.createdAt) }}"><time datetime="{{ post.createdAt }}">{{ post.createdAt | getPrettyDate(post.createdAt) }}</time></abbr></div>
+
+                    <div class="card-body">
+                {{ post.text }}
+                </div>
+
+                </div>
+                </div>
             {% endif %}
         {% endfor %}
 
     {% else %}
         <p>No posts! Why not make one?</p>
     {% endif %}
-
+<script>
+    
+        function getUserLocation(position) {
+            const {latitude, longitude} = window.skewLocation(position.coords.latitude, position.coords.longitude)
+            sessionStorage.setItem("lat", latitude)
+            sessionStorage.setItem("lon", longitude)
+            document.cookie = "lat=" + latitude + "; path=/";
+            document.cookie = "lon=" + longitude + "; path=/";
+            document
+                .querySelector("#status")
+                .style
+                .display = "none";
+            document
+                .querySelector("#submit")
+                .disabled = false
+        }
+        if (!sessionStorage.getItem("lat") || !sessionStorage.getItem("lon")) {
+            document
+                .querySelector("#status")
+                .innerHTML = "Openherd is an anonymous, location-based platform that lets you see what's happening around you. To share posts, we need access to your location. But, don’t worry! Your location is randomly shifted by at least 2 km (~1.24 mi) in a random direction, ensuring no one can pinpoint your exact position.<br><button onclick=\"navigator.geolocation.getCurrentPosition(getUserLocation)\" class=\"btn btn-primary\" type=\"button\">Give location access</button>";
+        } else {
+            document
+                .querySelector("#submit")
+                .disabled = false
+        }
+    </script>
 {% endblock %}

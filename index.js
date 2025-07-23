@@ -230,7 +230,8 @@ async function getReplies(postId) {
     });
   });
   env.addFilter("getPrettyDate", function (a, date) {
-    return prettydate.format(new Date(date || ""));
+    const short = str => str.replace(/^(\d+)\s(\w+).*$/, (_, n, unit) => n + unit[0]);
+    return short(prettydate.format(new Date(date || "")));
   });
   app.get("/global", async (req, res) => {
     var { lat, lon } = req.cookies;
@@ -266,10 +267,12 @@ async function getReplies(postId) {
     posts = posts.filter((post) => !post.parent);
     posts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // Sort posts by date
 
-    res.render("global.njk", {
+    res.render("index.njk", {
       posts,
       lat,
       lon,
+      title:"Global Posts",
+      description:"The feed is sorted by date only.",
       notice,
       peers: (await node.peerStore.all()).length,
       env: process.env,
@@ -312,6 +315,8 @@ async function getReplies(postId) {
       posts,
       lat,
       lon,
+           title:"Local Posts",
+      description:"These are posts sorted by your location and date, weighted equally in the ranking.",
       notice,
       peers: (await node.peerStore.all()).length,
       env: process.env,

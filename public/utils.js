@@ -68,3 +68,25 @@ if (location.pathname != "/new" && (!document.cookie.includes("lat") || !documen
   navigator.geolocation.getCurrentPosition(function (a) { getUserLocation(a, true) });
 
 }
+
+window.setActiveNavItem = function() {
+  const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    link.removeAttribute('aria-current');
+  });
+
+  const currentPath = window.location.pathname;
+  
+  navLinks.forEach(link => {
+    const linkPath = new URL(link.href).pathname;
+    if (linkPath === currentPath) {
+      link.classList.add('active');
+      link.setAttribute('aria-current', 'page');
+    }
+  });
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  setActiveNavItem();
+});
