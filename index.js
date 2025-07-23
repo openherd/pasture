@@ -99,56 +99,25 @@ async function getReplies(postId) {
   });
 
   function discover() {
-    config.bootstrappingServers.map(async server => {
+    config.relayServers.map(async address => {
       try {
-        const listeners = await (await fetch(`${server}/api/listeners`)).json()
-        const wsConnections = [];
-        const tcpConnections = [];
-        const wsdnsConnections = [];
-
-        listeners.forEach(multiaddr => {
-          if (multiaddr.includes('/wss') && (multiaddr.includes('/dns4') || multiaddr.includes('/dns6'))) {
-            wsdnsConnections.push(multiaddr);
-          } else if (multiaddr.includes('/ws')) {
-            wsConnections.push(multiaddr);
-          } else {
-            tcpConnections.push(multiaddr);
-          }
-        });
-        const peerAddresses = [...wsdnsConnections];
-        for (const l of peerAddresses) {
-          try {
-            await node.dial(multiaddr(l));
-            break;
-          } catch (e) {
-          }
-        }
-      } catch (e) {
-        console.error(e)
-      }
-      try {
-        const discovery = await (await fetch(`${server}/api/discovery`)).json()
-        const wsConnections = [];
-        const tcpConnections = [];
-
-        discovery.forEach(multiaddr => {
-          if (multiaddr.includes('/ws')) {
-            wsConnections.push(multiaddr);
-          } else {
-            tcpConnections.push(multiaddr);
-          }
-        });
-        const peerAddresses = [...wsConnections];
-        for (const l of peerAddresses) {
-          try {
-            await node.dial(multiaddr(l));
-          } catch (e) {
-          }
-        }
-      } catch (e) {
-        console.error(e)
-      }
+        const origin = new URL(address).origin;
+        (await (await fetch(`${origin}/_openherd/outbox`)).json()).map(async post => {
+          await utils.importPost({
+            signature: post.signature,
+            publicKey: post.publicKey,
+            data: post.data,
+            raw: JSON.stringify(post),
+          })
+        })
+        await fetch(`${origin}/_openherd/inbox`, {
+          method: "POST",
+          body: JSON.stringify((await utils.catchUp({ max: 10000 })).map(m => JSON.parse(m)))
+        })
+        console.debug(`synced with ${address}`)
+      } catch { }
     })
+
   }
   const catchUp = async () => {
     let peers = node.services.pubsub
@@ -163,7 +132,7 @@ async function getReplies(postId) {
   await discover()
   await catchUp()
   setInterval(discover, 1000 * 30)
-  setInterval(catchUp, 1000 * 1)
+  setInterval(catchUp, 1000 * 10)
   node.services.pubsub.addEventListener("message", async (message) => {
     const sender = message.detail.from;
     var data = new TextDecoder().decode(message.detail.data);
@@ -271,8 +240,8 @@ async function getReplies(postId) {
       posts,
       lat,
       lon,
-      title:"Global Posts",
-      description:"The feed is sorted by date only.",
+      title: "Global Posts",
+      description: "The feed is sorted by date only.",
       notice,
       peers: (await node.peerStore.all()).length,
       env: process.env,
@@ -315,8 +284,8 @@ async function getReplies(postId) {
       posts,
       lat,
       lon,
-           title:"Local Posts",
-      description:"These are posts sorted by your location and date, weighted equally in the ranking.",
+      title: "Local Posts",
+      description: "These are posts sorted by your location and date, weighted equally in the ranking.",
       notice,
       peers: (await node.peerStore.all()).length,
       env: process.env,
@@ -375,7 +344,7 @@ async function getReplies(postId) {
   });
   app.post("/_openherd/sync", async (req, res) => {
     const { address } = req.body;
-    if (!address) return res.status(400).send({ ok: false, error: "You must specify an address"});
+    if (!address) return res.status(400).send({ ok: false, error: "You must specify an address" });
     try {
       const origin = new URL(address).origin;
       (await (await fetch(`${origin}/_openherd/outbox`)).json()).map(async post => {
@@ -390,16 +359,16 @@ async function getReplies(postId) {
         method: "POST",
         body: JSON.stringify((await utils.catchUp({ max: 10000 })).map(m => JSON.parse(m)))
       })
-      return res.json({ ok: true, message: "Sync complete"})
+      return res.json({ ok: true, message: "Sync complete" })
     } catch {
 
     }
     try {
       await node.dial(multiaddr(address));
     } catch (e) {
-      return res.status(500).send({ ok: false, error: "Failed to dial multiaddr"});
+      return res.status(500).send({ ok: false, error: "Failed to dial multiaddr" });
     }
-    return res.send({ ok: true, message: "Multiaddr dial complete"});
+    return res.send({ ok: true, message: "Multiaddr dial complete" });
   });
   app.post("/new", async (req, res) => {
     const { text } = req.body;
@@ -443,12 +412,12 @@ async function getReplies(postId) {
     }
     try {
       for (var post of req.body) {
-        if (typeof post =="string") post = JSON.parse(post)
+        if (typeof post == "string") post = JSON.parse(post)
         utils.importPost({
-        ...post,
-        raw: JSON.stringify(post)
-         
-      });
+          ...post,
+          raw: JSON.stringify(post)
+
+        });
         const packet = JSON.stringify(post);
         const chunks = chunkMessage(packet);
         await Promise.all(
