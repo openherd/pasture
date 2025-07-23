@@ -16,6 +16,7 @@ dotenv.config();
 import express from "express";
 import nunjucks from "nunjucks";
 import utils from "./utils.js";
+import { fuzzFromOverpass } from "./skew.js";
 import prettydate from "pretty-date";
 import bodyParser from "body-parser";
 import schemas from "./schemas.js";
@@ -342,6 +343,48 @@ async function getReplies(postId) {
       id: node.getMultiaddrs().join("\n").trim(),
     });
   });
+   app.get("/settings", async (req, res) => {
+    res.render("settings.njk", {
+      peers: (await node.peerStore.all()).length,
+      id: node.getMultiaddrs().join("\n").trim(),
+    });
+  });
+  
+  app.post("/settings", async (req, res) => {
+    const { randomnessMode, units } = req.body;
+    
+    res.cookie('randomnessMode', randomnessMode, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+    res.cookie('units', units, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+    
+    res.redirect('/settings?saved=true');
+  });
+  app.post("/api/skew-location", async (req, res) => {
+    const { latitude, longitude } = req.body;
+    const { randomnessMode, units } = req.cookies;
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ error: "Latitude and longitude are required" });
+    }
+    
+    try {
+      const settings = {
+        mode: randomnessMode || 'privacy'
+      };
+      
+      const result = await fuzzFromOverpass(parseFloat(latitude), parseFloat(longitude), settings);
+      
+      res.json({
+        latitude: result.latitude,
+        longitude: result.longitude,
+        settings: result.settingsApplied,
+        context: result.contextUsed
+      });
+    } catch (error) {
+      console.error('Error skewing location:', error);
+      res.status(500).json({ error: "Failed to skew location" });
+    }
+  });
+
   app.post("/_openherd/sync", async (req, res) => {
     const { address } = req.body;
     if (!address) return res.status(400).send({ ok: false, error: "You must specify an address" });

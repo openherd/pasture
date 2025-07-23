@@ -1,0 +1,102 @@
+{% extends "parent.njk" %}
+
+{% block main %}
+  <h1>Settings</h1>
+
+  <div class="alert alert-success" role="alert" id="savedAlert" style="display: none;">
+        Settings saved successfully!
+    </div>
+
+  <form id="settingsForm" method="POST" action="/settings">
+    <div class="mb-3">
+      <label for="randomnessMode" class="form-label">Randomness Mode</label>
+      <select id="randomnessMode" name="randomnessMode" class="form-select">
+        <option value="clientRandom">Client-side random (default) - Simple random, no server processing</option>
+        <option value="privacy">Privacy - Good privacy, some realism</option>
+        <option value="uniform">Uniform - Completely random in range</option>
+        <option value="plausible">Plausible - Looks realistic, less privacy</option>
+        <option value="urbanSnap">Urban Snap - Always 50m, for city centers</option>
+      </select>
+      <div class="form-text">
+        <strong>Client-side random:</strong> Simple random skewing (1-3km) without server processing. Most private option.<br>
+        <strong>Privacy:</strong> Analyzes nearby buildings and population to determine safer skewing distance (2.5-5km in rural areas, 1-3km elsewhere). Prioritizes privacy over realism.<br>
+        <strong>Uniform:</strong> Equal probability anywhere within the calculated range based on local context.<br>
+        <strong>Plausible:</strong> Shorter distances more likely, creating realistic-looking locations but potentially less private.<br>
+        <strong>Urban Snap:</strong> Fixed 50m offset for dense city centers where small movements are sufficient.
+      </div>
+      <div class="form-text">
+        <p><b>Note:</b> Server-side options (Privacy, Uniform, Plausible, Urban Snap) send your location to analyze nearby buildings and population data via the <a href="https://overpass-turbo.eu">Overpass API</a>. This helps determine appropriate skewing distances - for example, moving you further away if you're in a sparse rural area with few nearby houses, or adjusting based on whether you're in a village, town, or city. The goal is to move your location far enough that it's not in your immediate neighborhood while maintaining plausibility.</p>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="units" class="form-label">Units</label>
+      <select id="units" name="units" class="form-select">
+        <option value="metric">Metric (meters, km)</option>
+        <option value="imperial">Imperial (feet, miles)</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Settings</button>
+  </form>
+  <hr>
+  <h2>Peer Connection</h2>
+  <p>You can connect to this peer using the following address:</p>
+  <pre><code>{{ id }}</code></pre>
+  <h3>Or, you can request peering.</h3>
+  <p>Your peer will be dialed as soon as you hit submit.</p>
+  <form action="/_openherd/sync" method="POST">
+    <label for="address">Multiaddress or URL</label><br>
+    <input id="address" style="width:100%;" class="form-control" name="address" placeholder="/ip4/192.168.1.381/tcp/43587/p2p/12D3KooWS6faDzVVo51yCF6hB8EDRDkfB7K9Yp7PCVgfuHzK7DYV">
+    <br>
+    <button class="btn btn-primary">Submit</button>
+  </form>
+
+  <script>
+    function getCookie(name) {
+      const v = document
+        .cookie
+        .match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v
+        ? decodeURIComponent(v[2])
+        : null;
+    }
+    function setCookie(name, value, days) {
+      let expires = '';
+      if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+      }
+      document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('saved') === 'true') {
+        document
+          .getElementById('savedAlert')
+          .style
+          .display = 'block';
+        window
+          .history
+          .replaceState({}, document.title, window.location.pathname);
+      }
+
+      const mode = getCookie('randomnessMode') || 'clientRandom';
+      const units = getCookie('units') || 'metric';
+      document
+        .getElementById('randomnessMode')
+        .value = mode;
+      document
+        .getElementById('units')
+        .value = units;
+
+      document
+        .getElementById('settingsForm')
+        .addEventListener('submit', function (e) {
+          sessionStorage.removeItem("lat")
+          sessionStorage.removeItem("lon")
+          setCookie('randomnessMode', document.getElementById('randomnessMode').value, 365);
+          setCookie('units', document.getElementById('units').value, 365);
+        });
+    });
+  </script>
+{% endblock %}
