@@ -300,9 +300,7 @@ async function getReplies(postId) {
       ),
     );
   }, 30 * 1000)
-  app.get("/new", async (req, res) => {
-    res.render("new.njk", { peers: (await node.peerStore.all()).length });
-  });
+
   app.get("/post/:id", async (req, res) => {
     const { id } = req.params;
     const post = await getPost(id);
@@ -337,42 +335,36 @@ async function getReplies(postId) {
       return addr.toString()
     }));
   });
-  app.get("/connect", async (req, res) => {
-    res.render("connect.njk", {
-      peers: (await node.peerStore.all()).length,
-      id: node.getMultiaddrs().join("\n").trim(),
-    });
-  });
-   app.get("/settings", async (req, res) => {
+  app.get("/settings", async (req, res) => {
     res.render("settings.njk", {
       peers: (await node.peerStore.all()).length,
       id: node.getMultiaddrs().join("\n").trim(),
     });
   });
-  
+
   app.post("/settings", async (req, res) => {
     const { randomnessMode, units } = req.body;
-    
+
     res.cookie('randomnessMode', randomnessMode, { maxAge: 365 * 24 * 60 * 60 * 1000 });
     res.cookie('units', units, { maxAge: 365 * 24 * 60 * 60 * 1000 });
-    
+
     res.redirect('/settings?saved=true');
   });
   app.post("/api/skew-location", async (req, res) => {
     const { latitude, longitude } = req.body;
     const { randomnessMode, units } = req.cookies;
-    
+
     if (!latitude || !longitude) {
       return res.status(400).json({ error: "Latitude and longitude are required" });
     }
-    
+
     try {
       const settings = {
         mode: randomnessMode || 'privacy'
       };
-      
+
       const result = await fuzzFromOverpass(parseFloat(latitude), parseFloat(longitude), settings);
-      
+
       res.json({
         latitude: result.latitude,
         longitude: result.longitude,
