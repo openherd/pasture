@@ -1,7 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import * as openpgp from "openpgp";
-import * as tf from "@tensorflow/tfjs-node";
-import * as toxicity from "@tensorflow-models/toxicity";
 import * as geolib from "geolib";
 
 const prisma = new PrismaClient();
@@ -248,13 +246,6 @@ export function processChunk(sender, data, messageBuffer, node) {
 }
 
 export async function postOK(text) {
-  const model = await toxicity.load();
-  const predictions = await model.classify(text);
-  const results = {};
-  for (const prediction of predictions) {
-    if (prediction.results[0].match) return false;
-    results[prediction.label] = prediction.results[0].match;
-  }
   return true;
 }
 
