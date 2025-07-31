@@ -80,6 +80,18 @@ export async function importPost({
       },
     });
     if (!existingPost) {
+      let isModerated = false;
+      if (process.env.ENABLE_MODERATION_CHECK) {
+        const config = await import('./config.json', { with: { type: 'json' } });
+        const moderationResult = await checkModeration([{
+          signature,
+          publicKey,
+          data,
+          id: key.getFingerprint()
+        }], config.default.moderationServices);
+        isModerated = moderationResult[0] !== null;
+      }
+      
       await prisma.post.create({
         data: {
           id: key.getFingerprint(),
@@ -91,6 +103,7 @@ export async function importPost({
           publicKey: publicKey,
           signature: signature,
           raw,
+          moderated: isModerated,
         },
       });
     }
@@ -147,6 +160,19 @@ export async function newPost({ latitude, longitude, text, parent, node }) {
     id: key.getFingerprint(),
     data: textToSign,
   });
+  
+  let isModerated = false;
+  if (process.env.ENABLE_MODERATION_CHECK) {
+    const config = await import('./config.json', { with: { type: 'json' } });
+    const moderationResult = await checkModeration([{
+      signature: signature,
+      publicKey,
+      data: textToSign,
+      id: key.getFingerprint()
+    }], config.default.moderationServices);
+    isModerated = moderationResult[0] !== null;
+  }
+  
   await prisma.post.create({
     data: {
       id: key.getFingerprint(),
@@ -157,6 +183,7 @@ export async function newPost({ latitude, longitude, text, parent, node }) {
       publicKey,
       signature,
       raw: packet,
+      moderated: isModerated,
     },
   });
   return packet;
@@ -231,6 +258,55 @@ export async function postOK(text) {
   return true;
 }
 
+export async function checkModeration(posts, moderationServices = []) {
+
+  if (!moderationServices.length) return posts.map(() => null);
+
+  const results = [];
+  
+  for (const service of moderationServices) {
+    try {
+      const response = await fetch(`${service}/_openherd/labels/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(posts),
+      });
+      if (response.ok) {
+        const labels = await response.json();
+        console.log(labels)
+        return labels; 
+      }
+    } catch (error) {
+      console.error(`Failed to check moderation with service ${service}:`, error);
+      continue;
+    }
+  }
+  
+  return posts.map(() => null);
+}
+
+export async function updatePostModeration(postId, isModerated) {
+  await prisma.post.update({
+    where: { id: postId },
+    data: { moderated: isModerated }
+  });
+}
+
+export async function getPostsFromLastTwoWeeks() {
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+  return await prisma.post.findMany({
+    where: {
+      createdAt: {
+        gte: twoWeeksAgo,
+      },
+    },
+  });
+}
+
 export default {
   getPosts,
   importPost,
@@ -242,4 +318,7 @@ export default {
   postOK,
   catchUp,
   isBase64,
+  checkModeration,
+  updatePostModeration,
+  getPostsFromLastTwoWeeks,
 };

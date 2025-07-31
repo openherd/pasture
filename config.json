@@ -1,3 +1,4 @@
 {
-  "relayServers": ["https://pasture.openherd.network/"]
+  "relayServers": ["https://pasture.openherd.network/"],
+  "moderationServices": ["https://moderation.openherd.network/"]
 }

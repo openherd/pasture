@@ -27,6 +27,9 @@ import {
   chunkMessage,
   rankPosts,
   postOK,
+  checkModeration,
+  updatePostModeration,
+  getPostsFromLastTwoWeeks,
 } from "./utils.js";
 import cookieParser from "cookie-parser";
 import geolib from "geolib";
@@ -475,6 +478,79 @@ async function getReplies(postId) {
       res.status(500).json({ ok: false, error: "Failed to send posts" });
     }
   });
+
+  // Moderation endpoints
+  app.get("/_openherd/labels", async (req, res) => {
+    // Return available moderation labels
+    const labels = [
+      {
+        "label": "Spam",
+        "description": "Unwanted or repetitive content"
+      },
+      {
+        "label": "Harassment",
+        "description": "Content that targets individuals with abuse"
+      },
+      {
+        "label": "Violence",
+        "description": "Content promoting or depicting violence"
+      },
+      {
+        "label": "Adult Content",
+        "description": "Sexually explicit or suggestive content"
+      },
+      {
+        "label": "Misinformation",
+        "description": "False or misleading information"
+      }
+    ];
+    res.json(labels);
+  });
+
+  app.post("/_openherd/labels/query", async (req, res) => {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json({ error: "Expected an array of post envelopes" });
+    }
+
+    try {
+      const results = await checkModeration(req.body, config.moderationServices);
+      res.json(results);
+    } catch (error) {
+      console.error('Error checking moderation:', error);
+      res.status(500).json({ error: "Failed to check moderation" });
+    }
+  });
+
+  app.post("/_openherd/labels/report", async (req, res) => {
+    if (!Array.isArray(req.body)) {
+      return res.status(400).json({ error: "Expected an array of post reports" });
+    }
+
+    try {
+      // For now, just log the reports
+      // In a real implementation, you'd store these in a database
+      console.log('Received reports:', req.body.length);
+      req.body.forEach((report, index) => {
+        console.log(`Report ${index + 1}: ${report.reason} for post ${report.id}`);
+      });
+
+      res.json({
+        ok: true,
+        message: "Reports received",
+        error: null,
+        count: req.body.length
+      });
+    } catch (error) {
+      console.error('Error processing reports:', error);
+      res.status(500).json({
+        ok: false,
+        message: "Failed to process reports",
+        error: error.message,
+        count: 0
+      });
+    }
+  });
+
   const listener = app.listen(process.env.PORT || 3000, () => {
     console.log(`Pasture listening on port ${listener.address().port}`);
   });

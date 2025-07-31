@@ -4,6 +4,10 @@
   "main": "index.js",
   "license": "AGPL-3.0-only",
   "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "recheck-moderation": "node recheck-moderation.js"
+  },
   "dependencies": {
     "@chainsafe/libp2p-gossipsub": "^14.1.0",
     "@chainsafe/libp2p-noise": "^16.0.1",
